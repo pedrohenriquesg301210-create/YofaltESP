@@ -146,23 +146,24 @@ local function createESP(plr)
 	
 	removeESP(plr)
 
+	local character = plr.Character
+	local head = character:FindFirstChild("Head")
+	local root = character:FindFirstChild("HumanoidRootPart")
+	
 	if highlightEnabled then
 		local highlight = Instance.new("Highlight")
 		highlight.FillTransparency = 1
 		highlight.OutlineColor = Color3.new(1,1,1)
 		highlight.OutlineTransparency = 0
 		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-		highlight.Adornee = plr.Character
-		highlight.Parent = workspace
+		highlight.Adornee = character
+		highlight.Parent = character
 		highlights[plr] = highlight
 	end
 	
-	local head = plr.Character:FindFirstChild("Head")
-	local root = plr.Character:FindFirstChild("HumanoidRootPart")
-	
 	if head and root then
 		local billboard = Instance.new("BillboardGui")
-		billboard.Size = UDim2.new(0,100,0,25)
+		billboard.Size = UDim2.new(0,100,0,28)
 		billboard.StudsOffset = Vector3.new(0,2.5,0)
 		billboard.AlwaysOnTop = true
 		billboard.Parent = head
@@ -173,7 +174,8 @@ local function createESP(plr)
 		text.TextColor3 = Color3.new(1,1,1)
 		text.TextStrokeTransparency = 0
 		text.Font = Enum.Font.Montserrat
-		text.TextScaled = true
+		text.TextScaled = false
+		text.TextSize = 18
 		text.Parent = billboard
 		
 		nameTags[plr] = {
@@ -187,31 +189,35 @@ end
 
 RunService.RenderStepped:Connect(function()
 	for plr,data in pairs(nameTags) do
-		if data.root and data.root.Parent then
+		if data.root and data.root.Parent and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
 			
-			local distance = (camera.CFrame.Position - data.root.Position).Magnitude
+			local distance = (lp.Character.HumanoidRootPart.Position - data.root.Position).Magnitude
 			
-			local minSize = 60
-			local maxSize = 130
-			local maxDistance = 3000
+			local MIN_SIZE = 60
+			local MAX_SIZE = 110
+			local MAX_DISTANCE = 3000
 			
-			local clamped = math.clamp(distance,0,maxDistance)
-			local alpha = clamped/maxDistance
-			local finalSize = minSize + (alpha*(maxSize-minSize))
+			local clampedDistance = math.clamp(distance, 0, MAX_DISTANCE)
+			local alpha = clampedDistance / MAX_DISTANCE
+			local finalSize = MIN_SIZE + ((MAX_SIZE - MIN_SIZE) * alpha)
 			
-			data.gui.Size = UDim2.new(0,finalSize,0,finalSize*0.28)
+			data.gui.Size = UDim2.new(0, finalSize, 0, finalSize * 0.28)
 			
 			local textContent = ""
 			
 			if nameEnabled then
-				textContent = data.player.Name
+				textContent = plr.Name
 			end
 			
 			if studsEnabled then
-				textContent = textContent.." ["..math.floor(distance).."]"
+				if textContent ~= "" then
+					textContent = textContent .. " "
+				end
+				textContent = textContent .. "[" .. math.floor(distance) .. " studs]"
 			end
 			
 			data.label.Text = textContent
+			data.gui.Enabled = (nameEnabled or studsEnabled)
 		end
 	end
 end)
