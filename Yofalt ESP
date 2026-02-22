@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 
 local lp = Players.LocalPlayer
 local playerGui = lp:WaitForChild("PlayerGui")
@@ -66,65 +65,33 @@ screenGui.Name = "ESP_GUI"
 screenGui.Parent = playerGui
 screenGui.ResetOnSpawn = false
 
-local function createCorner(obj, radius)
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius or 10)
-	corner.Parent = obj
-end
-
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 220, 0, 260)
 mainFrame.Position = UDim2.new(0, 20, 0, 50)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
-createCorner(mainFrame, 12)
 makeDraggable(mainFrame)
 
-local stroke = Instance.new("UIStroke")
-stroke.Parent = mainFrame
-stroke.Thickness = 3
-stroke.Color = Color3.fromRGB(255,0,0)
-
-local glow = Instance.new("ImageLabel")
-glow.Parent = mainFrame
-glow.BackgroundTransparency = 1
-glow.Size = UDim2.new(1,20,1,20)
-glow.Position = UDim2.new(0,-10,0,-10)
-glow.Image = "rbxassetid://4996891970"
-glow.ImageColor3 = Color3.fromRGB(255,0,0)
-glow.ImageTransparency = 0.4
-glow.ScaleType = Enum.ScaleType.Slice
-glow.SliceCenter = Rect.new(24,24,276,276)
-glow.ZIndex = 0
-
-task.spawn(function()
-	while true do
-		TweenService:Create(stroke,TweenInfo.new(1.2,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=0.4}):Play()
-		TweenService:Create(glow,TweenInfo.new(1.2,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{ImageTransparency=0.7}):Play()
-		task.wait(1.2)
-		TweenService:Create(stroke,TweenInfo.new(1.2,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=0}):Play()
-		TweenService:Create(glow,TweenInfo.new(1.2,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{ImageTransparency=0.4}):Play()
-		task.wait(1.2)
-	end
-end)
-
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1,0,0,25)
+title.Size = UDim2.new(1,0,0,30)
 title.BackgroundTransparency = 1
 title.Text = "Yofalt ESP"
 title.TextColor3 = Color3.new(1,1,1)
-title.Font = Enum.Font.GothamBold
+title.Font = Enum.Font.Montserrat
 title.TextSize = 18
 title.Parent = mainFrame
 
 local minimizeButton = Instance.new("TextButton")
 minimizeButton.Size = UDim2.new(0,25,0,25)
-minimizeButton.Position = UDim2.new(1,-30,0,0)
+minimizeButton.Position = UDim2.new(1,-30,0,2)
 minimizeButton.Text = "-"
 minimizeButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
 minimizeButton.TextColor3 = Color3.new(1,1,1)
+minimizeButton.Font = Enum.Font.Montserrat
+minimizeButton.TextSize = 16
+minimizeButton.BorderSizePixel = 0
 minimizeButton.Parent = mainFrame
-createCorner(minimizeButton,6)
 
 local function createButton(text,posY)
 	local btn = Instance.new("TextButton")
@@ -133,16 +100,16 @@ local function createButton(text,posY)
 	btn.Text = text
 	btn.BackgroundColor3 = Color3.fromRGB(180,50,50)
 	btn.TextColor3 = Color3.new(1,1,1)
-	btn.Font = Enum.Font.GothamBold
+	btn.Font = Enum.Font.Montserrat
 	btn.TextSize = 18
+	btn.BorderSizePixel = 0
 	btn.Parent = mainFrame
-	createCorner(btn,12)
 	return btn
 end
 
-local highlightButton = createButton("HITBOX OFF",35)
-local nameButton = createButton("NAME OFF",95)
-local studsButton = createButton("STUDS OFF",155)
+local highlightButton = createButton("HITBOX OFF",40)
+local nameButton = createButton("NAME OFF",100)
+local studsButton = createButton("STUDS OFF",160)
 
 minimizeButton.MouseButton1Click:Connect(function()
 	minimized = not minimized
@@ -205,7 +172,7 @@ local function createESP(plr)
 		text.BackgroundTransparency = 1
 		text.TextColor3 = Color3.new(1,1,1)
 		text.TextStrokeTransparency = 0
-		text.Font = Enum.Font.GothamBold
+		text.Font = Enum.Font.Montserrat
 		text.TextScaled = true
 		text.Parent = billboard
 		
