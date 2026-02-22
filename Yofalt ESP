@@ -10,10 +10,6 @@ local espEnabled = false
 local highlights = {}
 local nameTags = {}
 
--- =========================
--- FUNÇÃO DRAG (ARRASTAR)
--- =========================
-
 local function makeDraggable(frame)
 
 	local dragging = false
@@ -60,10 +56,6 @@ local function makeDraggable(frame)
 		end
 	end)
 end
-
--- =========================
--- GUI
--- =========================
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ESP_GUI"
@@ -126,11 +118,7 @@ miniBar.Visible = false
 miniBar.Parent = screenGui
 createCorner(miniBar, 10)
 
-makeDraggable(miniBar) -- BARRINHA TAMBÉM ARRASTÁVEL
-
--- =========================
--- ESP FUNÇÕES
--- =========================
+makeDraggable(miniBar)
 
 local function createESP(plr)
 	if plr == lp then return end
@@ -208,10 +196,6 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 end)
-
--- =========================
--- BOTÕES
--- =========================
 
 espButton.MouseButton1Click:Connect(function()
 	espEnabled = not espEnabled
