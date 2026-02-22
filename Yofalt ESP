@@ -1,0 +1,257 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local lp = Players.LocalPlayer
+local playerGui = lp:WaitForChild("PlayerGui")
+local camera = workspace.CurrentCamera
+
+local espEnabled = false
+local highlights = {}
+local nameTags = {}
+
+-- =========================
+-- FUNÇÃO DRAG (ARRASTAR)
+-- =========================
+
+local function makeDraggable(frame)
+
+	local dragging = false
+	local dragInput
+	local dragStart
+	local startPos
+
+	local function update(input)
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+			
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	frame.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			update(input)
+		end
+	end)
+end
+
+-- =========================
+-- GUI
+-- =========================
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ESP_GUI"
+screenGui.Parent = playerGui
+screenGui.ResetOnSpawn = false
+
+local function createCorner(obj, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius or 10)
+	corner.Parent = obj
+end
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 120)
+mainFrame.Position = UDim2.new(0, 20, 0, 50)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+mainFrame.Parent = screenGui
+createCorner(mainFrame, 12)
+
+makeDraggable(mainFrame) -- AGORA É ARRASTÁVEL
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,25)
+title.BackgroundTransparency = 1
+title.Text = "Yofalt ESP"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.Parent = mainFrame
+
+local espButton = Instance.new("TextButton")
+espButton.Size = UDim2.new(0,200,0,50)
+espButton.Position = UDim2.new(0,10,0,35)
+espButton.Text = "ESP OFF"
+espButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
+espButton.TextColor3 = Color3.new(1,1,1)
+espButton.Font = Enum.Font.GothamBold
+espButton.TextSize = 18
+espButton.Parent = mainFrame
+createCorner(espButton, 12)
+
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Size = UDim2.new(0,20,0,20)
+minimizeButton.Position = UDim2.new(1,-25,0,5)
+minimizeButton.Text = "-"
+minimizeButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
+minimizeButton.TextColor3 = Color3.new(1,1,1)
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.TextSize = 16
+minimizeButton.Parent = mainFrame
+createCorner(minimizeButton, 6)
+
+local miniBar = Instance.new("TextButton")
+miniBar.Size = UDim2.new(0,120,0,30)
+miniBar.Position = mainFrame.Position
+miniBar.Text = "Yofalt ESP"
+miniBar.BackgroundColor3 = Color3.fromRGB(60,60,60)
+miniBar.TextColor3 = Color3.new(1,1,1)
+miniBar.Visible = false
+miniBar.Parent = screenGui
+createCorner(miniBar, 10)
+
+makeDraggable(miniBar) -- BARRINHA TAMBÉM ARRASTÁVEL
+
+-- =========================
+-- ESP FUNÇÕES
+-- =========================
+
+local function createESP(plr)
+	if plr == lp then return end
+	if highlights[plr] then return end
+	
+	local highlight = Instance.new("Highlight")
+	highlight.FillTransparency = 1
+	highlight.OutlineColor = Color3.new(1,1,1)
+	highlight.OutlineTransparency = 0
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	highlight.Parent = plr.Character
+	
+	highlights[plr] = highlight
+	
+	local head = plr.Character:FindFirstChild("Head")
+	local root = plr.Character:FindFirstChild("HumanoidRootPart")
+	
+	if head and root then
+		local billboard = Instance.new("BillboardGui")
+		billboard.Size = UDim2.new(0,90,0,25)
+		billboard.StudsOffset = Vector3.new(0,2.5,0)
+		billboard.AlwaysOnTop = true
+		billboard.Parent = head
+		
+		local text = Instance.new("TextLabel")
+		text.Size = UDim2.new(1,0,1,0)
+		text.BackgroundTransparency = 1
+		text.Text = plr.Name
+		text.TextColor3 = Color3.new(1,1,1)
+		text.TextStrokeTransparency = 0
+		text.Font = Enum.Font.GothamBold
+		text.TextScaled = true
+		text.Parent = billboard
+		
+		nameTags[plr] = {
+			gui = billboard,
+			root = root
+		}
+	end
+end
+
+local function removeESP(plr)
+	if highlights[plr] then
+		highlights[plr]:Destroy()
+		highlights[plr] = nil
+	end
+	
+	if nameTags[plr] then
+		nameTags[plr].gui:Destroy()
+		nameTags[plr] = nil
+	end
+end
+
+-- ESCALA SUAVE 0.8 → 1.2
+RunService.RenderStepped:Connect(function()
+	if not espEnabled then return end
+	
+	for plr, data in pairs(nameTags) do
+		if data.root and data.root.Parent then
+			
+			local distance = (camera.CFrame.Position - data.root.Position).Magnitude
+			
+			local baseSize = 90
+			local maxDistance = 3000
+			
+			local minScale = 0.8
+			local maxScale = 1.2
+			
+			local alpha = math.clamp(distance / maxDistance, 0, 1)
+			local scale = minScale + (maxScale - minScale) * alpha
+			
+			local finalSize = baseSize * scale
+			
+			data.gui.Size = UDim2.new(0, finalSize, 0, finalSize * 0.28)
+		end
+	end
+end)
+
+-- =========================
+-- BOTÕES
+-- =========================
+
+espButton.MouseButton1Click:Connect(function()
+	espEnabled = not espEnabled
+	
+	if espEnabled then
+		espButton.Text = "ESP ON"
+		espButton.BackgroundColor3 = Color3.fromRGB(50,180,50)
+	else
+		espButton.Text = "ESP OFF"
+		espButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
+	end
+	
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= lp and plr.Character then
+			if espEnabled then
+				createESP(plr)
+			else
+				removeESP(plr)
+			end
+		end
+	end
+end)
+
+minimizeButton.MouseButton1Click:Connect(function()
+	mainFrame.Visible = false
+	miniBar.Position = mainFrame.Position
+	miniBar.Visible = true
+end)
+
+miniBar.MouseButton1Click:Connect(function()
+	mainFrame.Position = miniBar.Position
+	mainFrame.Visible = true
+	miniBar.Visible = false
+end)
+
+Players.PlayerAdded:Connect(function(plr)
+	plr.CharacterAdded:Connect(function()
+		if espEnabled then
+			task.wait(1)
+			createESP(plr)
+		end
+	end)
+end)
