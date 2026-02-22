@@ -1,6 +1,6 @@
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local lp = Players.LocalPlayer
 local playerGui = lp:WaitForChild("PlayerGui")
@@ -11,72 +11,58 @@ local highlights = {}
 local nameTags = {}
 
 local function makeDraggable(frame)
+	frame.Active = true
 	local dragging = false
-	local dragInput
 	local dragStart
 	local startPos
 
-	local function update(input)
-		local delta = input.Position - dragStart
-		frame.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
-	end
-
 	frame.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1
-		or input.UserInputType == Enum.UserInputType.Touch then
-			
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
 			dragStart = input.Position
 			startPos = frame.Position
-			
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
 		end
 	end)
 
-	frame.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement
-		or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
+	frame.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
 		end
 	end)
 
 	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			update(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local delta = input.Position - dragStart
+			frame.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
 		end
 	end)
 end
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "ESP_GUI"
 screenGui.Parent = playerGui
 screenGui.ResetOnSpawn = false
 
 local function createCorner(obj, radius)
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius or 10)
+	corner.CornerRadius = UDim.new(0, radius)
 	corner.Parent = obj
 end
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 220, 0, 120)
-mainFrame.Position = UDim2.new(0, 20, 0, 50)
+mainFrame.Position = UDim2.new(0, 50, 0, 80)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
 mainFrame.Parent = screenGui
 createCorner(mainFrame, 12)
 makeDraggable(mainFrame)
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1,0,0,25)
+title.Size = UDim2.new(1, -30, 0, 25)
 title.BackgroundTransparency = 1
 title.Text = "Yofalt ESP"
 title.TextColor3 = Color3.new(1,1,1)
@@ -84,9 +70,50 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.Parent = mainFrame
 
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Size = UDim2.new(0,25,0,25)
+minimizeButton.Position = UDim2.new(1,-28,0,0)
+minimizeButton.Text = "-"
+minimizeButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
+minimizeButton.TextColor3 = Color3.new(1,1,1)
+minimizeButton.Parent = mainFrame
+createCorner(minimizeButton, 8)
+
+local miniBar = Instance.new("Frame")
+miniBar.Size = UDim2.new(0,150,0,35)
+miniBar.Position = mainFrame.Position
+miniBar.BackgroundColor3 = Color3.fromRGB(30,30,30)
+miniBar.Visible = false
+miniBar.Parent = screenGui
+createCorner(miniBar, 12)
+makeDraggable(miniBar)
+
+local miniLabel = Instance.new("TextLabel")
+miniLabel.Size = UDim2.new(1,0,1,0)
+miniLabel.BackgroundTransparency = 1
+miniLabel.Text = "Yofalt ESP"
+miniLabel.TextColor3 = Color3.new(1,1,1)
+miniLabel.Font = Enum.Font.GothamBold
+miniLabel.TextSize = 16
+miniLabel.Parent = miniBar
+
+minimizeButton.MouseButton1Click:Connect(function()
+	miniBar.Position = mainFrame.Position
+	mainFrame.Visible = false
+	miniBar.Visible = true
+end)
+
+miniBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		mainFrame.Position = miniBar.Position
+		mainFrame.Visible = true
+		miniBar.Visible = false
+	end
+end)
+
 local espButton = Instance.new("TextButton")
 espButton.Size = UDim2.new(0,200,0,50)
-espButton.Position = UDim2.new(0,10,0,35)
+espButton.Position = UDim2.new(0,10,0,45)
 espButton.Text = "ESP OFF"
 espButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
 espButton.TextColor3 = Color3.new(1,1,1)
@@ -100,7 +127,6 @@ local function removeESP(plr)
 		highlights[plr]:Destroy()
 		highlights[plr] = nil
 	end
-	
 	if nameTags[plr] then
 		nameTags[plr].gui:Destroy()
 		nameTags[plr] = nil
@@ -110,7 +136,7 @@ end
 local function createESP(plr)
 	if plr == lp then return end
 	if not plr.Character then return end
-	
+
 	removeESP(plr)
 
 	local highlight = Instance.new("Highlight")
@@ -118,21 +144,20 @@ local function createESP(plr)
 	highlight.OutlineColor = Color3.new(1,1,1)
 	highlight.OutlineTransparency = 0
 	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-	highlight.Adornee = plr.Character
-	highlight.Parent = workspace
-	
+	highlight.Parent = plr.Character
+
 	highlights[plr] = highlight
-	
+
 	local head = plr.Character:FindFirstChild("Head")
 	local root = plr.Character:FindFirstChild("HumanoidRootPart")
-	
+
 	if head and root then
 		local billboard = Instance.new("BillboardGui")
-		billboard.Size = UDim2.new(0,90,0,25)
+		billboard.Size = UDim2.new(0,70,0,20) -- DIMINUÍDO
 		billboard.StudsOffset = Vector3.new(0,2.5,0)
 		billboard.AlwaysOnTop = true
 		billboard.Parent = head
-		
+
 		local text = Instance.new("TextLabel")
 		text.Size = UDim2.new(1,0,1,0)
 		text.BackgroundTransparency = 1
@@ -142,7 +167,7 @@ local function createESP(plr)
 		text.Font = Enum.Font.GothamBold
 		text.TextScaled = true
 		text.Parent = billboard
-		
+
 		nameTags[plr] = {
 			gui = billboard,
 			root = root
@@ -157,38 +182,34 @@ RunService.RenderStepped:Connect(function()
 		if data.root and data.root.Parent then
 			local distance = (camera.CFrame.Position - data.root.Position).Magnitude
 			
-			local baseSize = 90
-			local maxDistance = 3000
+			local minDistance = 10
+			local maxDistance = 300
 			
-			local minScale = 0.8
-			local maxScale = 1.2
+			local minScale = 0.75
+			local maxScale = 1.0
 			
-			local alpha = math.clamp(distance / maxDistance, 0, 1)
+			local alpha = math.clamp((distance - minDistance) / (maxDistance - minDistance), 0, 1)
 			local scale = minScale + (maxScale - minScale) * alpha
 			
-			local finalSize = baseSize * scale
-			
-			data.gui.Size = UDim2.new(0, finalSize, 0, finalSize * 0.28)
+			data.gui.Size = UDim2.new(0, 70 * scale, 0, 20 * scale)
 		end
 	end
 end)
 
 espButton.MouseButton1Click:Connect(function()
 	espEnabled = not espEnabled
-	
+
 	if espEnabled then
 		espButton.Text = "ESP ON"
 		espButton.BackgroundColor3 = Color3.fromRGB(50,180,50)
-		
+
 		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr ~= lp and plr.Character then
-				createESP(plr)
-			end
+			createESP(plr)
 		end
 	else
 		espButton.Text = "ESP OFF"
 		espButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
-		
+
 		for _, plr in ipairs(Players:GetPlayers()) do
 			removeESP(plr)
 		end
@@ -197,19 +218,17 @@ end)
 
 local function setupPlayer(plr)
 	if plr == lp then return end
-	
-	local function onCharacter(char)
-		task.wait(0.5)
+
+	plr.CharacterAdded:Connect(function()
+		task.wait(0.3)
 		if espEnabled then
 			createESP(plr)
 		end
+	end)
+
+	if plr.Character and espEnabled then
+		createESP(plr)
 	end
-	
-	if plr.Character then
-		onCharacter(plr.Character)
-	end
-	
-	plr.CharacterAdded:Connect(onCharacter)
 end
 
 for _, plr in ipairs(Players:GetPlayers()) do
@@ -217,7 +236,4 @@ for _, plr in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerAdded:Connect(setupPlayer)
-
-Players.PlayerRemoving:Connect(function(plr)
-	removeESP(plr)
-end)
+Players.PlayerRemoving:Connect(removeESP)
