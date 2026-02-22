@@ -11,7 +11,6 @@ local highlights = {}
 local nameTags = {}
 
 local function makeDraggable(frame)
-
 	local dragging = false
 	local dragInput
 	local dragStart
@@ -74,8 +73,7 @@ mainFrame.Position = UDim2.new(0, 20, 0, 50)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
 mainFrame.Parent = screenGui
 createCorner(mainFrame, 12)
-
-makeDraggable(mainFrame) -- AGORA É ARRASTÁVEL
+makeDraggable(mainFrame)
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1,0,0,25)
@@ -97,39 +95,31 @@ espButton.TextSize = 18
 espButton.Parent = mainFrame
 createCorner(espButton, 12)
 
-local minimizeButton = Instance.new("TextButton")
-minimizeButton.Size = UDim2.new(0,20,0,20)
-minimizeButton.Position = UDim2.new(1,-25,0,5)
-minimizeButton.Text = "-"
-minimizeButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
-minimizeButton.TextColor3 = Color3.new(1,1,1)
-minimizeButton.Font = Enum.Font.GothamBold
-minimizeButton.TextSize = 16
-minimizeButton.Parent = mainFrame
-createCorner(minimizeButton, 6)
-
-local miniBar = Instance.new("TextButton")
-miniBar.Size = UDim2.new(0,120,0,30)
-miniBar.Position = mainFrame.Position
-miniBar.Text = "Yofalt ESP"
-miniBar.BackgroundColor3 = Color3.fromRGB(60,60,60)
-miniBar.TextColor3 = Color3.new(1,1,1)
-miniBar.Visible = false
-miniBar.Parent = screenGui
-createCorner(miniBar, 10)
-
-makeDraggable(miniBar)
+local function removeESP(plr)
+	if highlights[plr] then
+		highlights[plr]:Destroy()
+		highlights[plr] = nil
+	end
+	
+	if nameTags[plr] then
+		nameTags[plr].gui:Destroy()
+		nameTags[plr] = nil
+	end
+end
 
 local function createESP(plr)
 	if plr == lp then return end
-	if highlights[plr] then return end
+	if not plr.Character then return end
 	
+	removeESP(plr)
+
 	local highlight = Instance.new("Highlight")
 	highlight.FillTransparency = 1
 	highlight.OutlineColor = Color3.new(1,1,1)
 	highlight.OutlineTransparency = 0
 	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-	highlight.Parent = plr.Character
+	highlight.Adornee = plr.Character
+	highlight.Parent = workspace
 	
 	highlights[plr] = highlight
 	
@@ -160,25 +150,11 @@ local function createESP(plr)
 	end
 end
 
-local function removeESP(plr)
-	if highlights[plr] then
-		highlights[plr]:Destroy()
-		highlights[plr] = nil
-	end
-	
-	if nameTags[plr] then
-		nameTags[plr].gui:Destroy()
-		nameTags[plr] = nil
-	end
-end
-
--- ESCALA SUAVE 0.8 → 1.2
 RunService.RenderStepped:Connect(function()
 	if not espEnabled then return end
 	
 	for plr, data in pairs(nameTags) do
 		if data.root and data.root.Parent then
-			
 			local distance = (camera.CFrame.Position - data.root.Position).Magnitude
 			
 			local baseSize = 90
@@ -203,39 +179,45 @@ espButton.MouseButton1Click:Connect(function()
 	if espEnabled then
 		espButton.Text = "ESP ON"
 		espButton.BackgroundColor3 = Color3.fromRGB(50,180,50)
+		
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if plr ~= lp and plr.Character then
+				createESP(plr)
+			end
+		end
 	else
 		espButton.Text = "ESP OFF"
 		espButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
-	end
-	
-	for _, plr in ipairs(Players:GetPlayers()) do
-		if plr ~= lp and plr.Character then
-			if espEnabled then
-				createESP(plr)
-			else
-				removeESP(plr)
-			end
+		
+		for _, plr in ipairs(Players:GetPlayers()) do
+			removeESP(plr)
 		end
 	end
 end)
 
-minimizeButton.MouseButton1Click:Connect(function()
-	mainFrame.Visible = false
-	miniBar.Position = mainFrame.Position
-	miniBar.Visible = true
-end)
-
-miniBar.MouseButton1Click:Connect(function()
-	mainFrame.Position = miniBar.Position
-	mainFrame.Visible = true
-	miniBar.Visible = false
-end)
-
-Players.PlayerAdded:Connect(function(plr)
-	plr.CharacterAdded:Connect(function()
+local function setupPlayer(plr)
+	if plr == lp then return end
+	
+	local function onCharacter(char)
+		task.wait(0.5)
 		if espEnabled then
-			task.wait(1)
 			createESP(plr)
 		end
-	end)
+	end
+	
+	if plr.Character then
+		onCharacter(plr.Character)
+	end
+	
+	plr.CharacterAdded:Connect(onCharacter)
+end
+
+for _, plr in ipairs(Players:GetPlayers()) do
+	setupPlayer(plr)
+end
+
+Players.PlayerAdded:Connect(setupPlayer)
+
+Players.PlayerRemoving:Connect(function(plr)
+	removeESP(plr)
 end)
