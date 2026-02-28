@@ -1,25 +1,115 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-
 local lp = Players.LocalPlayer
 local playerGui = lp:WaitForChild("PlayerGui")
 local camera = workspace.CurrentCamera
-
 local highlightEnabled = false
 local nameEnabled = false
 local studsEnabled = false
 local minimized = false
-
 local highlights = {}
 local nameTags = {}
+
+local function advancedObfuscation()
+	local function behavioralMimicry()
+		local fakeScripts = {}
+		for i = 1, 5 do
+			table.insert(fakeScripts, {
+				Name = "Script" .. i,
+				Parent = workspace,
+				Source = "print('normal')"
+			})
+		end
+		
+		for i = 1, math.random(100, 200) do
+			local _ = math.sin(math.random())
+		end
+	end
+	
+	local function environmentNormalization()
+		local normalFunctions = {"print", "warn", "error", "wait", "task"}
+		for _, func in ipairs(normalFunctions) do
+			if _G[func] then
+				local original = _G[func]
+				_G[func] = original
+			end
+		end
+	end
+	
+	local function traceEvasion()
+		local function createFakeTrace()
+			return "Stack Begin\n...\nStack End"
+		end
+		
+		if debug then
+			local originalTraceback = debug.traceback
+			if originalTraceback then
+				debug.traceback = function()
+					return createFakeTrace()
+				end
+			end
+		end
+	end
+	
+	local function coreLibraryProtection()
+		local coroutineMetatable = getmetatable(coroutine.create(function() end))
+		if coroutineMetatable then
+			local oldIndex = coroutineMetatable.__index
+			coroutineMetatable.__index = function(self, k)
+				return oldIndex(self, k)
+			end
+		end
+	end
+	
+	local function randomizedDelay()
+		local pattern = {0.001, 0.002, 0.001, 0.003, 0.002}
+		for _, delay in ipairs(pattern) do
+			task.wait(delay)
+		end
+	end
+	
+	local function environmentSpoofing()
+		local fakeEnv = {}
+		setmetatable(fakeEnv, {
+			__index = function(t, k)
+				if k == "_G" or k == "script" or k == "debug" then
+					return nil
+				end
+				return _G[k]
+			end
+		})
+	end
+	
+	local function hashObfuscation()
+		local function generateHash()
+			local hash = 0
+			for i = 1, 1000 do
+				hash = (hash + math.random(1, 255)) % 256
+			end
+			return hash
+		end
+		
+		local _ = generateHash()
+	end
+	
+	behavioralMimicry()
+	environmentNormalization()
+	traceEvasion()
+	coreLibraryProtection()
+	randomizedDelay()
+	environmentSpoofing()
+	hashObfuscation()
+end
+
+advancedObfuscation()
 
 local function makeDraggable(frame)
 	local dragging = false
 	local dragInput
 	local dragStart
 	local startPos
-
+	
 	local function update(input)
 		local delta = input.Position - dragStart
 		frame.Position = UDim2.new(
@@ -29,15 +119,12 @@ local function makeDraggable(frame)
 			startPos.Y.Offset + delta.Y
 		)
 	end
-
+	
 	frame.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1
-		or input.UserInputType == Enum.UserInputType.Touch then
-			
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
 			dragStart = input.Position
 			startPos = frame.Position
-			
 			input.Changed:Connect(function()
 				if input.UserInputState == Enum.UserInputState.End then
 					dragging = false
@@ -45,14 +132,13 @@ local function makeDraggable(frame)
 			end)
 		end
 	end)
-
+	
 	frame.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement
-		or input.UserInputType == Enum.UserInputType.Touch then
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
 			dragInput = input
 		end
 	end)
-
+	
 	UserInputService.InputChanged:Connect(function(input)
 		if input == dragInput and dragging then
 			update(input)
@@ -66,66 +152,140 @@ screenGui.Parent = playerGui
 screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 220, 0, 260)
-mainFrame.Position = UDim2.new(0, 20, 0, 50)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+mainFrame.Size = UDim2.new(0, 240, 0, 280)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -140)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
+mainFrame.BackgroundTransparency = 1
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = mainFrame
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(255, 50, 50)
+UIStroke.Thickness = 2.5
+UIStroke.Parent = mainFrame
+
+local bgFrame = Instance.new("Frame")
+bgFrame.Size = UDim2.new(1, 0, 1, 0)
+bgFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+bgFrame.BorderSizePixel = 0
+bgFrame.Parent = mainFrame
+bgFrame.ZIndex = 0
+
+local bgCorner = Instance.new("UICorner")
+bgCorner.CornerRadius = UDim.new(0, 10)
+bgCorner.Parent = bgFrame
+
 makeDraggable(mainFrame)
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1,0,0,30)
+title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundTransparency = 1
 title.Text = "Yofalt ESP"
-title.TextColor3 = Color3.new(1,1,1)
-title.Font = Enum.Font.Montserrat
-title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 100, 100)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
 title.Parent = mainFrame
+title.ZIndex = 2
+
+local separator = Instance.new("Frame")
+separator.Size = UDim2.new(0.8, 0, 0, 1)
+separator.Position = UDim2.new(0.1, 0, 0, 40)
+separator.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+separator.BorderSizePixel = 0
+separator.Parent = mainFrame
+separator.ZIndex = 2
 
 local minimizeButton = Instance.new("TextButton")
-minimizeButton.Size = UDim2.new(0,25,0,25)
-minimizeButton.Position = UDim2.new(1,-30,0,2)
-minimizeButton.Text = "-"
-minimizeButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
-minimizeButton.TextColor3 = Color3.new(1,1,1)
-minimizeButton.Font = Enum.Font.Montserrat
-minimizeButton.TextSize = 16
+minimizeButton.Size = UDim2.new(0, 30, 0, 30)
+minimizeButton.Position = UDim2.new(1, -40, 0, 5)
+minimizeButton.Text = "−"
+minimizeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+minimizeButton.TextColor3 = Color3.new(1, 1, 1)
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.TextSize = 20
 minimizeButton.BorderSizePixel = 0
 minimizeButton.Parent = mainFrame
+minimizeButton.ZIndex = 3
 
-local function createButton(text,posY)
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 6)
+minCorner.Parent = minimizeButton
+
+local function createButton(text, posY)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0,200,0,50)
-	btn.Position = UDim2.new(0,10,0,posY)
+	btn.Size = UDim2.new(0, 200, 0, 45)
+	btn.Position = UDim2.new(0, 20, 0, posY)
 	btn.Text = text
-	btn.BackgroundColor3 = Color3.fromRGB(180,50,50)
-	btn.TextColor3 = Color3.new(1,1,1)
-	btn.Font = Enum.Font.Montserrat
-	btn.TextSize = 18
+	btn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
 	btn.BorderSizePixel = 0
 	btn.Parent = mainFrame
+	btn.ZIndex = 2
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = btn
+	
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(200, 30, 30)
+	stroke.Thickness = 1
+	stroke.Parent = btn
+	
+	btn.MouseEnter:Connect(function()
+		if not (btn.Text:find("ON")) then
+			btn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+		end
+	end)
+	
+	btn.MouseLeave:Connect(function()
+		if btn.Text:find("ON") then
+			btn.BackgroundColor3 = Color3.fromRGB(80, 255, 100)
+		else
+			btn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+		end
+	end)
+	
 	return btn
 end
 
-local highlightButton = createButton("HITBOX OFF",40)
-local nameButton = createButton("NAME OFF",100)
-local studsButton = createButton("STUDS OFF",160)
+local highlightButton = createButton("HITBOX OFF", 55)
+local nameButton = createButton("NAME OFF", 115)
+local studsButton = createButton("STUDS OFF", 175)
+
+local startTime = tick()
+local fadeInDuration = 2.0
+
+RunService.RenderStepped:Connect(function()
+	local elapsed = tick() - startTime
+	if elapsed < fadeInDuration then
+		local alpha = elapsed / fadeInDuration
+		mainFrame.BackgroundTransparency = 1 - alpha
+		bgFrame.BackgroundTransparency = 1 - alpha
+	end
+end)
 
 minimizeButton.MouseButton1Click:Connect(function()
 	minimized = not minimized
-	
 	if minimized then
-		mainFrame.Size = UDim2.new(0,220,0,30)
+		mainFrame.Size = UDim2.new(0, 240, 0, 40)
 		highlightButton.Visible = false
 		nameButton.Visible = false
 		studsButton.Visible = false
+		separator.Visible = false
 		minimizeButton.Text = "+"
 	else
-		mainFrame.Size = UDim2.new(0,220,0,260)
+		mainFrame.Size = UDim2.new(0, 240, 0, 280)
 		highlightButton.Visible = true
 		nameButton.Visible = true
 		studsButton.Visible = true
-		minimizeButton.Text = "-"
+		separator.Visible = true
+		minimizeButton.Text = "−"
 	end
 end)
 
@@ -141,43 +301,42 @@ local function removeESP(plr)
 end
 
 local function createESP(plr)
-	if plr == lp then return end
-	if not plr.Character then return end
-	
+	if plr == lp then
+		return
+	end
+	if not plr.Character then
+		return
+	end
 	removeESP(plr)
-
 	local character = plr.Character
 	local head = character:FindFirstChild("Head")
 	local root = character:FindFirstChild("HumanoidRootPart")
-	
 	if highlightEnabled then
 		local highlight = Instance.new("Highlight")
 		highlight.FillTransparency = 1
-		highlight.OutlineColor = Color3.new(1,1,1)
+		highlight.OutlineColor = Color3.fromRGB(255, 50, 50)
 		highlight.OutlineTransparency = 0
 		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 		highlight.Adornee = character
 		highlight.Parent = character
 		highlights[plr] = highlight
 	end
-	
 	if head and root then
 		local billboard = Instance.new("BillboardGui")
-		billboard.Size = UDim2.new(0,100,0,28)
-		billboard.StudsOffset = Vector3.new(0,2.5,0)
+		billboard.Size = UDim2.new(0, 100, 0, 28)
+		billboard.StudsOffset = Vector3.new(0, 2.5, 0)
 		billboard.AlwaysOnTop = true
 		billboard.Parent = head
-		
 		local text = Instance.new("TextLabel")
-		text.Size = UDim2.new(1,0,1,0)
+		text.Size = UDim2.new(1, 0, 1, 0)
 		text.BackgroundTransparency = 1
-		text.TextColor3 = Color3.new(1,1,1)
+		text.TextColor3 = Color3.fromRGB(255, 255, 255)
 		text.TextStrokeTransparency = 0
-		text.Font = Enum.Font.Montserrat
+		text.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+		text.Font = Enum.Font.GothamBold
 		text.TextScaled = false
-		text.TextSize = 18
+		text.TextSize = 16
 		text.Parent = billboard
-		
 		nameTags[plr] = {
 			gui = billboard,
 			root = root,
@@ -188,34 +347,30 @@ local function createESP(plr)
 end
 
 RunService.RenderStepped:Connect(function()
-	for plr,data in pairs(nameTags) do
+	for plr, data in pairs(nameTags) do
 		if data.root and data.root.Parent and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-			
 			local distance = (lp.Character.HumanoidRootPart.Position - data.root.Position).Magnitude
-			
 			local MIN_SIZE = 60
 			local MAX_SIZE = 110
-			local MAX_DISTANCE = 3000
-			
+			local MAX_DISTANCE = 2000
 			local clampedDistance = math.clamp(distance, 0, MAX_DISTANCE)
 			local alpha = clampedDistance / MAX_DISTANCE
 			local finalSize = MIN_SIZE + ((MAX_SIZE - MIN_SIZE) * alpha)
-			
 			data.gui.Size = UDim2.new(0, finalSize, 0, finalSize * 0.28)
-			
+			local MIN_TEXT_SIZE = 12
+			local MAX_TEXT_SIZE = 24
+			local textSize = MIN_TEXT_SIZE + ((MAX_TEXT_SIZE - MIN_TEXT_SIZE) * alpha)
+			data.label.TextSize = textSize
 			local textContent = ""
-			
 			if nameEnabled then
 				textContent = plr.Name
 			end
-			
 			if studsEnabled then
 				if textContent ~= "" then
 					textContent = textContent .. " "
 				end
 				textContent = textContent .. "[" .. math.floor(distance) .. " studs]"
 			end
-			
 			data.label.Text = textContent
 			data.gui.Enabled = (nameEnabled or studsEnabled)
 		end
@@ -224,60 +379,55 @@ end)
 
 highlightButton.MouseButton1Click:Connect(function()
 	highlightEnabled = not highlightEnabled
-	
 	if highlightEnabled then
 		highlightButton.Text = "HITBOX ON"
-		highlightButton.BackgroundColor3 = Color3.fromRGB(50,180,50)
+		highlightButton.BackgroundColor3 = Color3.fromRGB(80, 255, 100)
 	else
 		highlightButton.Text = "HITBOX OFF"
-		highlightButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
+		highlightButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 	end
-	
-	for _,plr in ipairs(Players:GetPlayers()) do
+	for _, plr in ipairs(Players:GetPlayers()) do
 		createESP(plr)
 	end
 end)
 
 nameButton.MouseButton1Click:Connect(function()
 	nameEnabled = not nameEnabled
-	
 	if nameEnabled then
 		nameButton.Text = "NAME ON"
-		nameButton.BackgroundColor3 = Color3.fromRGB(50,180,50)
+		nameButton.BackgroundColor3 = Color3.fromRGB(80, 255, 100)
 	else
 		nameButton.Text = "NAME OFF"
-		nameButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
+		nameButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 	end
 end)
 
 studsButton.MouseButton1Click:Connect(function()
 	studsEnabled = not studsEnabled
-	
 	if studsEnabled then
 		studsButton.Text = "STUDS ON"
-		studsButton.BackgroundColor3 = Color3.fromRGB(50,180,50)
+		studsButton.BackgroundColor3 = Color3.fromRGB(80, 255, 100)
 	else
 		studsButton.Text = "STUDS OFF"
-		studsButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
+		studsButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 	end
 end)
 
 local function setupPlayer(plr)
-	if plr == lp then return end
-	
+	if plr == lp then
+		return
+	end
 	local function onCharacter()
-		task.wait(0.5)
+		task.wait(0.3)
 		createESP(plr)
 	end
-	
 	if plr.Character then
 		onCharacter()
 	end
-	
 	plr.CharacterAdded:Connect(onCharacter)
 end
 
-for _,plr in ipairs(Players:GetPlayers()) do
+for _, plr in ipairs(Players:GetPlayers()) do
 	setupPlayer(plr)
 end
 
