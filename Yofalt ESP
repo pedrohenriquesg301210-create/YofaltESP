@@ -351,14 +351,14 @@ RunService.RenderStepped:Connect(function()
 		if data.root and data.root.Parent and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
 			local distance = (lp.Character.HumanoidRootPart.Position - data.root.Position).Magnitude
 			local MIN_SIZE = 60
-			local MAX_SIZE = 110
+			local MAX_SIZE = 100
 			local MAX_DISTANCE = 2000
 			local clampedDistance = math.clamp(distance, 0, MAX_DISTANCE)
 			local alpha = clampedDistance / MAX_DISTANCE
 			local finalSize = MIN_SIZE + ((MAX_SIZE - MIN_SIZE) * alpha)
 			data.gui.Size = UDim2.new(0, finalSize, 0, finalSize * 0.28)
-			local MIN_TEXT_SIZE = 12
-			local MAX_TEXT_SIZE = 24
+			local MIN_TEXT_SIZE = 14
+			local MAX_TEXT_SIZE = 18
 			local textSize = MIN_TEXT_SIZE + ((MAX_TEXT_SIZE - MIN_TEXT_SIZE) * alpha)
 			data.label.TextSize = textSize
 			local textContent = ""
@@ -419,9 +419,7 @@ local function setupPlayer(plr)
 	end
 	local function onCharacter()
 		task.wait(0.3)
-		if highlightEnabled or nameEnabled or studsEnabled then
-			createESP(plr)
-		end
+		createESP(plr)
 	end
 	if plr.Character then
 		onCharacter()
@@ -433,5 +431,14 @@ for _, plr in ipairs(Players:GetPlayers()) do
 	setupPlayer(plr)
 end
 
-Players.PlayerAdded:Connect(setupPlayer)
+Players.PlayerAdded:Connect(function(plr)
+	setupPlayer(plr)
+	if highlightEnabled or nameEnabled or studsEnabled then
+		plr.CharacterAdded:Connect(function()
+			task.wait(0.3)
+			createESP(plr)
+		end)
+	end
+end)
+
 Players.PlayerRemoving:Connect(removeESP)
