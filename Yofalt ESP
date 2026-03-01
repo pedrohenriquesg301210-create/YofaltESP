@@ -419,7 +419,9 @@ local function setupPlayer(plr)
 	end
 	local function onCharacter()
 		task.wait(0.3)
-		createESP(plr)
+		if highlightEnabled or nameEnabled or studsEnabled then
+			createESP(plr)
+		end
 	end
 	if plr.Character then
 		onCharacter()
