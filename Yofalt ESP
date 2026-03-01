@@ -314,7 +314,7 @@ local function createESP(plr)
 	if highlightEnabled then
 		local highlight = Instance.new("Highlight")
 		highlight.FillTransparency = 1
-		highlight.OutlineColor = Color3.fromRGB(255, 50, 50)
+		highlight.OutlineColor = plr.Team and plr.Team.TeamColor.Color or Color3.fromRGB(255, 255, 255)
 		highlight.OutlineTransparency = 0
 		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 		highlight.Adornee = character
